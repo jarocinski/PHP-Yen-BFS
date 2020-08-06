@@ -5,7 +5,7 @@ The project is intended for genealogical graphs where edges represent "coitions"
 
 Yen's algorithm itself is implemented as a function which calculates the next shortest path at each call.
 The shortest path function (required by Yen's) implements both-sides BFS algorithm.
-Numerous "next shorthest paths" found by Yens can be irrelevant from genealogical viewpoint (e.g., there are similar paths going to a son via its father as well as via mother); such paths are filtered by skipSentence function.
+Numerous "next shorthest paths" found by Yens can be irrelevant from genealogical viewpoint (e.g., there are similar paths going between siblings via their father as well as via mother); several such cases are filtered by skipSentence function.
 The functions are included in four PHP modules:
 - index.php contains a form setting parameters
 - Yen-BFS.php contains the functions calculating the next path, checking relevance of solution, and some other auxiliaries
