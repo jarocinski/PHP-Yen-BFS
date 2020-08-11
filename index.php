@@ -34,11 +34,11 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
     <input type="submit" name="sel" value="Run the search for selected persons" />
 
     <p style="margin-top:15px;margin-bottom:8px;">
-        ...or just enter IRNs (up to 5 digits each, not full IDs!) of the two persons:</p>
+        ...or just enter IRNs (up to 5 digits each, not full ID strings!) of the two persons:</p>
     <label for="irn1"><code>person1 IRN:
-            <input type="number" id="irn1" name="irn1" style="width:8ch;" value="1" /></code></label>
+            <input type="number" id="irn1" name="irn1" max="30000" style="width:8ch;" value="1" /></code></label>
     <label for="irn2"><code>&nbsp;&nbsp;&nbsp;person2 IRN:
-            <input type="number" id="irn2" name="irn2" style="width:8ch;" value="13160" /></code></label>
+            <input type="number" id="irn2" name="irn2" max="30000" style="width:8ch;" value="13160" /></code></label>
     <p style="margin-top:10px;">
         <input type="submit" name="irn" value="Run the search for submitted IRNs" />
     </p>
