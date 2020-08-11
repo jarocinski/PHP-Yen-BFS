@@ -123,5 +123,5 @@ if (count(get_included_files())==2) { # tzn że uruchamiamy ten skrypt z ręki a
         else: echo "\n<br>Isolated $pers1 and $pers2 - no neighbours found after $bfsFound steps";
         endif;
     endif;
-//echo "\n<br>vvvvisited: "; print_r($visited);
+//echo "\n<br>visited: "; print_r($visited);
 }
