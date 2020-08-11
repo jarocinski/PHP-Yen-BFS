@@ -1,7 +1,7 @@
 <?php
 include "Yen-BFS.php";
 
- $persons=array(
+ $persons=array( # sample names refer to the test4.ged
 'I000001' => 'mja',
 'I017036' => 'Wojciech Jarociński ojciec Małgorzaty',
 'I001455' => 'Antoni A. Szaszkiewicz skomplikowana rodzina',
