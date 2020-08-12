@@ -50,7 +50,7 @@ function YensNextPath($edges,$start,$finish,&$kShortestPaths,$lengthLimit) {
             $pathExists = TRUE;
         else:
             $pathExists = FALSE;
-            echo "\n<br>There is no connection between $start and $finish";
+//            echo "\n<br>There is no connection between $start and $finish";
         endif;
         return;
     endif;
@@ -150,9 +150,10 @@ function YensNextPath($edges,$start,$finish,&$kShortestPaths,$lengthLimit) {
 //}
 
 function constructSentence(array $path, array $graph): string {
-    $sentence = '';
+    $sentence=$gender = '';
     for ($person=1; $person<sizeof($path); $person++):
         $sentence .= $graph[$path[$person-1]][$path[$person]];
+        $gender .= $graph[$path[$person-1]][$path[$person]];
     endfor;
     return $sentence;
 }
@@ -224,10 +225,9 @@ if (count(get_included_files())==0): # jesli 3 to uruchamiamy ten skrypt z ręki
             echo " (length = $l incl.$m marriages)";
         endif;
     endfor;
-
 else:
-//    if (isset($_POST['searchnext'])):
-//    echo "\n<br>form parameters received: "; echo print_r($_POST);
+    //if (isset($_POST['searchnext'])):
+    //  echo "\n<br>form parameters received: "; echo print_r($_POST); endif;
     if(isset($_POST['maxRuns']) && is_numeric($_POST['maxRuns'])):
         $maxRuns = $_POST['maxRuns'];
     else: echo "\n<br>Bad maxRuns parameter"; return;
@@ -256,19 +256,40 @@ else:
     echo "\n<br>Person2 $toNode is&nbsp;<samp> $namesDict[$toNode]</samp>";
     for ($k=1;$k<=$maxRuns;$k++):
         YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
-        if (!$pathExists) break;
+        if (!$pathExists):
+            echo "\n<br>There is no connection between $fromNode and $toNode";
+            return; # exit from Yen-BFS and return to index
+        endif;
         $relStrings[$k] = constructSentence($kShortestPaths[$k],$graph);
         if (skipSentence ($k,$relStrings,$kShortestPaths[$k],$graph,$echo)):
-            continue; # go to next path
-        else:
+            continue; # go to finding the next path
+        else:  # display results
             echo "\n\n<br><br> The $k"."th path is:\n<br>";
             echo implode('-',$kShortestPaths[$k]);
             echo "\n<br> rel.sentence = $relStrings[$k]";
             $l=strlen($relStrings[$k]); $m=substr_count($relStrings[$k],'s');
             echo " (length = $l incl.$m marriages)";
+            if (isset($_POST["names"])): # display full names
+//                echo "<br>wyświetlanie nazwisk włączone<br>";
+                echo "\n<br>$namesDict[$fromNode]";
+                for ($ord=0;$ord<strlen($relStrings[$k]);$ord++):
+                    $prevID = $kShortestPaths[$k][$ord];
+                    $persID = $kShortestPaths[$k][$ord+1];
+                    $fullName = $namesDict[$persID];
+                    $gender = $sexDict[$persID];
+                    $hisHer = $sexDict[$prevID]=='M'?'his':'her';
+                    $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
+                    $relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
+                    $rel = $relStrings[$k][$ord];
+                    $relation = $relTable[$gender][$rel];
+                    echo " --";
+                    if (isset($_POST["rels"])) echo "$hisHer $relation";
+                    echo " $fullName";
+                endfor;
+            endif;
         endif;
     endfor;
-    if($pathExists) echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
+    echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
 
 endif;
 

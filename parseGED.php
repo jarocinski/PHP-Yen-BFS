@@ -17,6 +17,11 @@ function fullName($lin) {  # wycina z linii 1 Imię i Nazwisko
     return substr($lin,7);
 }
 
+function gender($lin) {  # wycina z linii 1 płeć
+//    if (preg_match("/^1 SEX /", $lin))
+    return $lin[6];
+}
+
 function printDots($licznik) {  # drukowanie kropek w miare postępu
     # użycie: licznik = printDots(licznik)
     $licznik += 1;
@@ -48,15 +53,19 @@ function weightof($path) {
 }
 
 function parseGedcom($gedcomfile) {
-    # czyta $gedcomfile tworząc
-    # $People - graf tzn słownik wszystkich osób z ich koicjami i filiacjami
-    # $People[x] to tablica (lista) sąsiadów, każdy sąsiad id to tablica (rel,dist,prev)
-    # $namesDict - tablica nazwisk (id=>nazwisko)
-    global $namesDict; $namesDict = [];
+/** @param $gedcomfile - full path to file - read the file and create:
+ *  @return $People - the resulting graph i.e. array of all persons and their coitions and filiations
+ *    $People[x] is array of neighbors, each neighbor is array ID=>[rel,dist,prev]
+ *  @global $namesDict - array of full names (ID=>name)
+ *  global $sexDict - array of genders (ID=>gender)
+**/
+    global $namesDict;
+    global $sexDict;
+    $namesDict=$sexDict = [];
     $file = fopen($gedcomfile,'r')
         or die("fail to open file");
     $licz = 0;  # tylko do kropek postępu
-    echo "Budowanie grafu\n<br>Ludzie ";
+//    echo "Budowanie grafu\n<br>Ludzie ";
     # szukamy pierwszego INDI
     $curline = fgets($file);
     while (strncmp($curline,"0 @I",4)) $curline = fgets($file); # pomijamy aż do pierwszego INDI
@@ -68,6 +77,7 @@ function parseGedcom($gedcomfile) {
         if (strncmp($curline,"0 @I",4)==0): # kolejny INDI - wstawić do słownika nazwisk
             $People[indi($curline)] = [];  # dopisuje id z pustą tablicą krewnych
             $namesDict[indi($curline)] = fullName(fgets($file)); # w następnej linii musi być nazwisko
+            $sexDict[indi($curline)] = gender(fgets($file)); # w następnej linii musi być sex
             $licz = printDots($licz);
         endif;
         $curline = fgets($file);
