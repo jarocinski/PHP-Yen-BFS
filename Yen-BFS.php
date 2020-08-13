@@ -228,12 +228,12 @@ if (count(get_included_files())==0): # jesli 3 to uruchamiamy ten skrypt z ręki
 else:
     //if (isset($_POST['searchnext'])):
     //  echo "\n<br>form parameters received: "; echo print_r($_POST); endif;
-    if(isset($_POST['maxRuns']) && is_numeric($_POST['maxRuns'])):
-        $maxRuns = $_POST['maxRuns'];
+    if(isset($_POST['maxR']) && is_numeric($_POST['maxR'])):
+        $maxRuns = $_POST['maxR'];
     else: echo "\n<br>Bad maxRuns parameter"; return;
     endif;
-    if(isset($_POST['maxLength']) && is_numeric($_POST['maxLength'])):
-        $maxLength = $_POST['maxLength'];
+    if(isset($_POST['maxL']) && is_numeric($_POST['maxL'])):
+        $maxLength = $_POST['maxL'];
     else: echo "\n<br>Bad maxLength parameter"; return;
     endif;
     if (isset($_POST["sel"])):
@@ -248,8 +248,9 @@ else:
             $toNode = "I".sprintf("%06d",$_POST['irn2']);
         else: echo "\n<br>Bad person1 IRN parameter"; return;
         endif;
-        if (!isset($graph[$fromNode])): echo "person IRN=$fromNode is not in Database"; return; endif;
-        if (!isset($graph[$toNode])): echo "person IRN=$toNode is not in Database"; return; endif;
+        if ($fromNode==$toNode): echo "The same person selected as start and end!"; return; endif;
+        if (!isset($graph[$fromNode])): echo "Person IRN=$fromNode is not in Database!"; return; endif;
+        if (!isset($graph[$toNode])): echo "Person IRN=$toNode is not in Database!"; return; endif;
     endif;
 
     echo "\n\n<br><br>Person1 $fromNode is&nbsp;<samp> $namesDict[$fromNode]</samp>";
