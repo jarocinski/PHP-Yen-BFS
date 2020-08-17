@@ -272,15 +272,17 @@ else:
             echo " (length = $l incl.$m marriages)";
             if (isset($_POST["names"])): # display full names
 //                echo "<br>wyświetlanie nazwisk włączone<br>";
+                $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
+                $relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
+                $pathNames=[]; $pathNames[] = $namesDict[$fromNode]; # creating aux list of fullnames
                 echo "\n<br>$namesDict[$fromNode]";
                 for ($ord=0;$ord<strlen($relStrings[$k]);$ord++):
                     $prevID = $kShortestPaths[$k][$ord];
                     $persID = $kShortestPaths[$k][$ord+1];
                     $fullName = $namesDict[$persID];
+                    $pathNames[] = $fullName;
                     $gender = $sexDict[$persID];
                     $hisHer = $sexDict[$prevID]=='M'?'his':'her';
-                    $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
-                    $relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
                     $rel = $relStrings[$k][$ord];
                     $relation = $relTable[$gender][$rel];
                     echo " --";

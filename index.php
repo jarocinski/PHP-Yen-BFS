@@ -9,7 +9,7 @@ include "Yen-BFS.php";
     'I025995' => 'Janusz Jarociński z Warszawy',
     'I021940' => 'Tekla Szołowska',
     'I011721' => 'Frycek',
-    'I011563' => 'Król St.August Poniatowski'
+    'I011563' => 'Król Stanisław August Poniatowski'
  ];
 $pid1 = isset($_POST['person1']) ? $_POST['person1'] : 'I017036';
 $pid2 = isset($_POST['person2']) ? $_POST['person2'] : 'I021940';
