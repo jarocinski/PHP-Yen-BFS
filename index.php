@@ -23,6 +23,22 @@ $fromNode = "<select name='person1' form='nextpath' style='margin-bottom:10px;'>
 $toNode = "<select name='person2' form='nextpath'>$options2</select>";
 ?>
 
+<head>
+    <title>path placed in table</title>
+    <style>
+        table {
+            border: 1px solid black;
+            background-color: linen;
+        }
+        td.name {
+            min-width:90px;
+            border: 1px solid black;
+            text-align: center;
+            background-color: lightyellow;
+        }
+    </style>
+</head>
+<body>
 <hr>
 <!--note: all values posted by the form are kept for the next run-->
 <form method="POST" id="nextpath">

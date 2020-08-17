@@ -9,6 +9,9 @@ if (!$_POST):  # called without form data
     return;
 endif;
 $pathExists = FALSE;
+# translate relationships to xy change
+$pcs2move=['p'=>['x'=>0,'y'=>-1],'c'=>['x'=>0,'y'=>1],'s'=>['x'=>1,'y'=>0]];
+$borders=['p'=>'border-bottom-style:hidden','c'=>'border-top-style:hidden','s'=>'border-left-style:hidden','@'=>'border-style:double'];
 
 function mjaBFS($edges, $start, $finish, &$shortestpathfound) {
     global $maxLength;
@@ -290,6 +293,45 @@ else:
                     echo " $fullName";
                 endfor;
             endif;
+
+            $relStr = $relStrings[$k];
+            echo "\n<br>$relStr";
+            $xMax = substr_count($relStr,'s')+substr_count($relStr,'pc')+1;
+            $y=$yMax=$yMin=0;
+            for ($i=0;$i<strlen($relStr);$i++): # calc y range
+                if ($relStr[$i]=='p') $yMin = min(--$y,$yMin);
+                if ($relStr[$i]=='c') $yMax = max(++$y,$yMax);
+            endfor;
+            $yMax=$yMax-$yMin+1; # counting from 0 finally
+            $XY = array_fill(0,$xMax,array_fill(0,$yMax,' ')); # init empty array
+            $x=0; $y=-$yMin; #start position
+            $XY[$x][$y] = '@'.$pathNames[0]; # first person
+            foreach (range(0,strlen($relStr)-1) as $i):
+                $x+=$pcs2move[$relStr[$i]]['x'];
+                $y+=$pcs2move[$relStr[$i]]['y'];
+                if (substr($relStr,$i,2)=='pc'): $XY[$x][$y]='merge'; $x++; endif;
+                $XY[$x][$y]=$relStr[$i].' '.$pathNames[$i+1];
+            endforeach;
+
+            $XYtr = array_map(null, ...$XY); # transposing array - what a clever method!
+# push php array to html
+            $colspan2="";
+            $out = "<table>";
+            foreach ($XYtr as $row):
+                $out .= "<tr>";
+                foreach($row as $cell):
+                    if ($cell=='merge'): $colspan2="colspan='2'"; continue;
+                    elseif ($cell==' '): $out .= "<td class='empty'/>";
+                    else:
+                        $border=$borders[$cell[0]];
+                        $out .= "<td class='name' " . $colspan2 . ">$cell</td>"; $colspan2="";
+                    endif;
+                endforeach;
+                $out .= "</tr>";
+            endforeach;
+            $out .= "</table>";
+            echo $out;
+
         endif;
     endfor;
     echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";

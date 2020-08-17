@@ -11,16 +11,6 @@
             text-align: center;
             background-color: lightyellow;
         }
-        td.marr {
-            width:5px;
-            background-color: green;
-            text-align: center;
-        }
-        td.spac {
-            width:5px;
-            background-color: white;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
