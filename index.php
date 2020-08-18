@@ -24,14 +24,15 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
 ?>
 
 <head>
-    <title>path placed in table</title>
+    <title>Search K shortest paths</title>
     <style>
         table {
             border: 1px solid black;
             background-color: linen;
         }
-        td.name {
+        .name {
             min-width:90px;
+            max-width:250px;
             border: 1px solid black;
             text-align: center;
             background-color: lightyellow;
@@ -45,14 +46,15 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
     <br><b>Searching paths</b>
     <label for="maxL">&nbsp;no longer than
         <input type="number" id="maxL" name="maxL" style="width:6ch;"
-            value="<?php echo isset($_POST['maxL']) ? $_POST['maxL'] : "25" ?>" /></label>
+            value="<?php echo isset($_POST['maxL']) ? $_POST['maxL'] : "15" ?>" /></label>
     <label for="maxR">&nbsp;in search runs
         <input type="number" id="maxR" name="maxR" style="width:6ch;"
             value="<?php echo isset($_POST['maxR']) ? $_POST['maxR'] : "30" ?>" /></label>
-    <label for="names">&nbsp; Show full names
+
+    <label for="names">&nbsp;Show full names
         <input type="checkbox" id="names" name="names" style="transform:scale(1.3);"
-            <?php if(isset($_POST['names'])) echo "checked='checked'"; ?> /></label>
-    <label for="rels">&nbsp; with relationship
+            <?php if(isset($_POST['names']) || isset($_POST['rels'])) echo "checked='checked'"; ?> /></label>
+    <label for="rels">&nbsp;Display names in 2D diagram
         <input type="checkbox" id="rels" name="rels" style="transform:scale(1.3);"
             <?php if(isset($_POST['rels'])) echo "checked='checked'"; ?>/></label>
     <?php
