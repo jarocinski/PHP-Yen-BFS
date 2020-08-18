@@ -259,6 +259,7 @@ else: # called from external script
 
     echo "\n\n<br><br>Person1 $fromNode is&nbsp;<samp> $namesDict[$fromNode]</samp>";
     echo "\n<br>Person2 $toNode is&nbsp;<samp> $namesDict[$toNode]</samp>";
+    $longestChecked=0;
     for ($k=1;$k<=$maxRuns;$k++):
         YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
         if (!$pathExists):
@@ -266,15 +267,13 @@ else: # called from external script
             return; # exit from Yen-BFS and return to index
         endif;
         $relStrings[$k] = constructRelString($kShortestPaths[$k],$graph);
+        $longestChecked=max($longestChecked,strlen($relStrings[$k]));
         if (skipSentence ($k,$relStrings,$kShortestPaths[$k],$graph,$echo)):
             continue; # go to finding the next path
         else:  # display results
             echo "\n\n<br><br> The $k"."th path is:\n<br>";
             if (!isset($_POST["names"])&&!isset($_POST["rels"])): # don't display names
                 echo implode('-',$kShortestPaths[$k]);
-                echo "\n<br> rel.sentence = $relStrings[$k]";
-                $l=strlen($relStrings[$k]); $m=substr_count($relStrings[$k],'s');
-                echo " (length = $l incl.$m marriages)";
             else: # display full names and relatioships
 //                echo "<br>wyświetlanie nazwisk włączone<br>";
                 $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
@@ -293,10 +292,13 @@ else: # called from external script
                     echo " --$hisHer $relation $fullName";
                 endfor;
             endif;
+            echo "\n<br> rel.sentence = $relStrings[$k]";
+            $l=strlen($relStrings[$k]); $m=substr_count($relStrings[$k],'s');
+            echo " (length = $l incl.$m marriages)";
 
             if (isset($_POST["rels"])): # prepare 2d diagram
                 $relStr = $relStrings[$k];
-                echo "\n<br>$relStr";
+//                echo "\n<br>$relStr";
                 $xMax = substr_count($relStr,'s')+substr_count($relStr,'pc')+1;
                 $y=$yMax=$yMin=0;
                 for ($i=0;$i<strlen($relStr);$i++): # calc y range
@@ -337,5 +339,6 @@ else: # called from external script
         endif;
     endfor;
     echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
+    echo "<br>(the longest path checked was $longestChecked)";
 
 endif;
