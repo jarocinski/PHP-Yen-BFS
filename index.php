@@ -2,14 +2,15 @@
 include "Yen-BFS.php";
 
  $persons= [ # sample names refer to the test4.ged
-    'I000001' => 'mja',
-    'I002764' => 'Lusieńka',
-    'I017036' => 'Wojciech Jarociński ojciec Małgorzaty',
-    'I001455' => 'Antoni A. Szaszkiewicz skomplikowana rodzina',
-    'I025995' => 'Janusz Jarociński z Warszawy',
-    'I021940' => 'Tekla Szołowska',
-    'I011721' => 'Frycek',
-    'I011563' => 'Król Stanisław August Poniatowski'
+     'I000001' => 'mja',
+     'I002764' => 'Lusieńka',
+     'I017036' => 'Wojciech Jarociński ojciec Małgorzaty',
+     'I021954' => 'Teresa Sokołowska ż.Wojciecha J.',
+     'I001455' => 'Antoni A. Szaszkiewicz skomplikowana rodzina',
+     'I025995' => 'Janusz Jarociński z Warszawy',
+     'I021940' => 'Tekla Szołowska',
+     'I011721' => 'Frycek',
+     'I011563' => 'Król Stanisław August Poniatowski'
  ];
 $pid1 = isset($_POST['person1']) ? $_POST['person1'] : 'I017036';
 $pid2 = isset($_POST['person2']) ? $_POST['person2'] : 'I021940';
@@ -29,13 +30,18 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
         table {
             border: 1px solid black;
             background-color: linen;
+            border-spacing: 4px;
         }
         .name {
-            min-width:90px;
-            max-width:250px;
+            min-width: 90px;
+            max-width: 250px;
             border: 1px solid black;
             text-align: center;
             background-color: lightyellow;
+        }
+        input[type='checkbox'] {
+            transform: scale(1.3);
+            filter: grayscale(1);
         }
     </style>
 </head>
@@ -46,17 +52,21 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
     <br><b>Searching paths</b>
     <label for="maxL">&nbsp;no longer than
         <input type="number" id="maxL" name="maxL" style="width:6ch;"
-            value="<?php echo isset($_POST['maxL']) ? $_POST['maxL'] : "15" ?>" /></label>
+            value="<?php echo isset($_POST['maxL']) ? $_POST['maxL'] : "55" ?>" /></label>
     <label for="maxR">&nbsp;in search runs
         <input type="number" id="maxR" name="maxR" style="width:6ch;"
-            value="<?php echo isset($_POST['maxR']) ? $_POST['maxR'] : "30" ?>" /></label>
+            value="<?php echo isset($_POST['maxR']) ? $_POST['maxR'] : "555" ?>" /></label>
 
     <label for="names">&nbsp;Show full names
-        <input type="checkbox" id="names" name="names" style="transform:scale(1.3);"
-            <?php if(isset($_POST['names']) || isset($_POST['rels'])) echo "checked='checked'"; ?> /></label>
+        <input type="checkbox" id="names" name="names"
+            <?php if (!isset($_POST["sel"]) && !isset($_POST["irn"])) echo "checked"; ?>
+            <?php if(isset($_POST['names']) || isset($_POST['rels'])) echo "checked"; ?>
+        /></label>
     <label for="rels">&nbsp;Display names in 2D diagram
-        <input type="checkbox" id="rels" name="rels" style="transform:scale(1.3);"
-            <?php if(isset($_POST['rels'])) echo "checked='checked'"; ?>/></label>
+        <input type="checkbox" id="rels" name="rels"
+            <?php if (!isset($_POST["sel"]) && !isset($_POST["irn"])) echo "checked"; ?>
+            <?php if(isset($_POST['rels'])) echo "checked"; ?>
+        /></label>
     <?php
     echo "<br><pre>from $fromNode<br>  to $toNode</pre>"; # input selection of from-to names
     ?>

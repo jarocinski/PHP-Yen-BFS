@@ -11,7 +11,6 @@ endif;
 $pathExists = FALSE;
 # translate relationships to xy change in 2d diagram
 $pcs2move=['p'=>['x'=>0,'y'=>-1],'c'=>['x'=>0,'y'=>1],'s'=>['x'=>1,'y'=>0]];
-$borders=['p'=>'border-bottom-style:hidden','c'=>'border-top-style:hidden','s'=>'border-left-style:hidden','@'=>'border-style:double'];
 
 function mjaBFS($edges, $start, $finish, &$shortestpathfound) {
     global $maxLength;
@@ -162,40 +161,42 @@ function constructRelString(array $path, array $graph): string {
 }
 
 # skip the path if it is negligible in the genealogy sense
-function skipSentence (int $k, array $allSentences, array $kthPath, array $graph, bool $echo): bool {
-    $skip = FALSE; # mark if the path is useful
-    if (array_search($allSentences[$k], $allSentences) < $k): # duplicate s in relStrings
-        $skip = TRUE;
-        $dupl = array_search($allSentences[$k], $allSentences);
-        if ($echo): echo "(note that $k th = $allSentences[$k] is parents-equivalent to $dupl th)\n<br>"; endif;
-    elseif (substr_count($allSentences[$k], 'cp') > 0):
-        $skip = TRUE;
-        if ($echo): echo "(note that $k th = $allSentences[$k] goes between parents via a child and not directly)\n<br>"; endif;
-    elseif (substr_count($allSentences[$k], 'ps') > 0): # check if 'ps' concerns both parents (and not other marriage of a parent)
-        $from = 0; # start search from beginning, then after an occurence
-        while (($pos = strpos($allSentences[$k], 'ps', $from)) !== FALSE):
-            if (isset($graph[$kthPath[$pos]][$kthPath[$pos + 2]])):
-                $skip = TRUE;
-                if ($echo): echo "(note that $k th = $allSentences[$k] goes to a parent via the other parent and not directly)\n<br>"; endif;
-            endif;
-            $from = $pos + 1;
-        endwhile;
-    elseif (substr_count($allSentences[$k], 'sc') > 0): # check if 'sc' concerns child of both parents (and not other marriage of a parent)
-        $from = 0; # start search from beginning, then after an occurence
-        while (($pos = strpos($allSentences[$k], 'sc', $from)) !== FALSE):
-            if (isset($graph[$kthPath[$pos]][$kthPath[$pos + 2]])):
-                $skip = TRUE;
-                if ($echo): echo "(note that $k th = $allSentences[$k] goes to a child via the other parent and not directly)\n<br>"; endif;
+function skipPath (int $k, array $allRelStrings, array $kthPath, array $graph, bool $echo): bool {
+    $kthRelString = $allRelStrings[$k];
+    if (array_search($kthRelString, $allRelStrings) < $k): # duplicate s in relStrings
+        $dupl = array_search($kthRelString, $allRelStrings); # position of duplicate
+        if ($echo) echo "(note that $k th = $kthRelString is parents-equivalent to $dupl th)\n<br>";
+        return true;
+    endif;
+    if (substr_count($kthRelString,'cp') > 0):
+        if ($echo) echo "(note that $k th = $kthRelString goes between parents via a child and not directly)\n<br>";
+        return true;
+    endif;
+    if (substr_count($kthRelString,'ps') > 0): # check if 'ps' concerns both parents (and not another marriage of a parent)
+        $from = 1; # start search from beginning (excl.x), then after an occurence
+        while ($pos=strpos('x'.$kthRelString, 'ps', $from)): # in the original string $pos may be 0 (equal to false!)
+            if (isset($graph[$kthPath[$pos-1]][$kthPath[$pos+1]])):
+                if ($echo) echo "(note that $k th = $kthRelString goes to a parent via the other parent and not directly)\n<br>";
+                return true;
             endif;
             $from = $pos + 1;
         endwhile;
     endif;
-    return $skip;
+    if (substr_count($kthRelString,'sc') > 0): # check if 'sc' concerns child of both parents (and not other marriage of a parent)
+        $from = 1;
+        while ($pos=strpos('x'.$kthRelString, 'sc', $from)):
+            if (isset($graph[$kthPath[$pos-1]][$kthPath[$pos+1]])):
+                return true;
+            endif;
+            $from = $pos + 1;
+        endwhile;
+    endif;
+    return false;
 }
 
 ##########################################################
 
-$maxK = 18; # how many times to call for next path
+$maxK = 30; # how many times to call for next paths
 $maxLength = 20;  # max liczba łączy w ścieżce (nie waga); max liczba _par_ kroków przy biBFS jest $maxLength/2
 //$num = ['','shortest','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
 //$num=array_merge($num,array_fill(0,$maxK-10,'nTh'));
@@ -218,7 +219,7 @@ if (count(get_included_files())==0): # jesli 3 to uruchamiamy ten skrypt z ręki
         YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
         if (!$pathExists) break;
         $relStrings[$k] = constructRelString($kShortestPaths[$k],$graph);
-        if (skipSentence ($k,$relStrings,$kShortestPaths[$k],$graph,$echo)):
+        if (skipPath ($k,$relStrings,$kShortestPaths[$k],$graph,$echo)):
             continue; # go to next path
         else:
             echo "\n\n<br><br> The $k th path is:\n<br>";
@@ -229,37 +230,28 @@ if (count(get_included_files())==0): # jesli 3 to uruchamiamy ten skrypt z ręki
         endif;
     endfor;
 else: # called from external script
-    //if (isset($_POST['searchnext'])):
-    //  echo "\n<br>form parameters received: "; print_r($_POST); endif;
     # check parameters
-    if(isset($_POST['maxR']) && is_numeric($_POST['maxR'])):
-        $maxRuns = $_POST['maxR'];
-    else: echo "\n<br>Bad maxRuns parameter"; return;
-    endif;
-    if(isset($_POST['maxL']) && is_numeric($_POST['maxL'])):
-        $maxLength = $_POST['maxL'];
-    else: echo "\n<br>Bad maxLength parameter"; return;
-    endif;
+    if(isset($_POST['maxR']) && is_numeric($_POST['maxR'])): $maxRuns = $_POST['maxR'];
+    else: echo "\n<br>Bad maxRuns parameter"; return; endif;
+    if(isset($_POST['maxL']) && is_numeric($_POST['maxL'])): $maxLength = $_POST['maxL'];
+    else: echo "\n<br>Bad maxLength parameter"; return; endif;
     if (isset($_POST["sel"])):
         $fromNode = $_POST['person1'];
         $toNode = $_POST['person2'];
     elseif (isset($_POST["irn"])):
-        if(isset($_POST['irn1']) && is_numeric($_POST['irn1'])):
-            $fromNode = "I".sprintf("%06d",$_POST['irn1']);
-        else: echo "\n<br>Bad person1 IRN parameter"; return;
-        endif;
-        if(isset($_POST['irn2']) && is_numeric($_POST['irn1'])):
-            $toNode = "I".sprintf("%06d",$_POST['irn2']);
-        else: echo "\n<br>Bad person1 IRN parameter"; return;
-        endif;
+        if(isset($_POST['irn1']) && is_numeric($_POST['irn1'])): $fromNode = "I".sprintf("%06d",$_POST['irn1']);
+        else: echo "\n<br>Bad person1 IRN parameter"; return; endif;
+        if(isset($_POST['irn2']) && is_numeric($_POST['irn1'])): $toNode = "I".sprintf("%06d",$_POST['irn2']);
+        else: echo "\n<br>Bad person1 IRN parameter"; return; endif;
         if ($fromNode==$toNode): echo "The same person selected as start and end!"; return; endif;
         if (!isset($graph[$fromNode])): echo "Person IRN=$fromNode is not in Database!"; return; endif;
         if (!isset($graph[$toNode])): echo "Person IRN=$toNode is not in Database!"; return; endif;
-    endif; # parameters checked
+    endif; # parameters verified
 
     echo "\n\n<br><br>Person1 $fromNode is&nbsp;<samp> $namesDict[$fromNode]</samp>";
     echo "\n<br>Person2 $toNode is&nbsp;<samp> $namesDict[$toNode]</samp>";
-    $longestChecked=0;
+    $longestSoFar=0;
+    $relevant=0;
     for ($k=1;$k<=$maxRuns;$k++):
         YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
         if (!$pathExists):
@@ -267,11 +259,12 @@ else: # called from external script
             return; # exit from Yen-BFS and return to index
         endif;
         $relStrings[$k] = constructRelString($kShortestPaths[$k],$graph);
-        $longestChecked=max($longestChecked,strlen($relStrings[$k]));
-        if (skipSentence ($k,$relStrings,$kShortestPaths[$k],$graph,$echo)):
+        $longestSoFar=max($longestSoFar,strlen($relStrings[$k]));
+        if (skipPath ($k,$relStrings,$kShortestPaths[$k],$graph,$echo) ):
             continue; # go to finding the next path
         else:  # display results
             echo "\n\n<br><br> The $k"."th path is:\n<br>";
+            $relevant+=1;
             if (!isset($_POST["names"])&&!isset($_POST["rels"])): # don't display names
                 echo implode('-',$kShortestPaths[$k]);
             else: # display full names and relatioships
@@ -308,15 +301,16 @@ else: # called from external script
                 $yMax=$yMax-$yMin+1; # counting from 0 finally
                 $XY = array_fill(0,$xMax,array_fill(0,$yMax,' ')); # init empty array
                 $x=0; $y=-$yMin; #start position
-                $XY[$x][$y] = '@ '.$pathNames[0]; # first person
+                $XY[$x][$y] = '(@) '.$pathNames[0]; # first person
                 foreach (range(0,strlen($relStr)-1) as $i):
                     $x+=$pcs2move[$relStr[$i]]['x'];
                     $y+=$pcs2move[$relStr[$i]]['y'];
                     if (substr($relStr,$i,2)=='pc'): $XY[$x][$y]='merge'; $x++; endif;
-                    $XY[$x][$y]=$relStr[$i].' '.$pathNames[$i+1];
+                    $XY[$x][$y]='('.$relStr[$i].') '.$pathNames[$i+1];
                 endforeach;
 
                 $XYtr = array_map(null, ...$XY); # transposing array - what a clever method!
+                $borders=['p'=>" border-bottom:none ",'c'=>" border-top:none ",'s'=>'border-left:none ','@'=>'border:double '];
                 # push php array to html
                 $colspan2="";
                 $out = "<table>";
@@ -326,7 +320,7 @@ else: # called from external script
                         if ($cell=='merge'): $colspan2="colspan='2'"; continue;
                         elseif ($cell==' '): $out .= "<td class='empty'/>";
                         else:
-                            $border=$borders[$cell[0]];
+//                            $border=$borders[$cell[0]];
                             $out .= "<td class='name' " . $colspan2 . ">$cell</td>"; $colspan2="";
                         endif;
                     endforeach;
@@ -334,11 +328,11 @@ else: # called from external script
                 endforeach;
                 $out .= "</table>";
                 echo $out;
-            endif; # end displaying 2d
-
+            endif; # end of displaying 2d
         endif;
     endfor;
     echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
-    echo "<br>(the longest path checked was $longestChecked)";
+    echo "<br>(the longest path checked was $longestSoFar)";
+    echo "<br>Found $relevant relevant paths";
 
 endif;

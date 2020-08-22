@@ -83,7 +83,7 @@ function parseGedcom($gedcomfile) {
         $curline = fgets($file);
 #?    if (feof($file)) return; # przedwczesny koniec pliku
     endwhile;
-    echo "\n<br>znaleziono $licz ludzi - teraz rodziny ";
+    echo "\n<br>$licz persons found; now families";
     # znaleziony FAM, teraz dopisujemy osoby z rodziny
     $parents = [];  # lista rodziców w tej rodzinie - czasem tylko jeden
     $children = [];  # lista dzieci w tej rodzinie - czasem pusta
@@ -125,17 +125,17 @@ function parseGedcom($gedcomfile) {
         endif; # koniec członków rodziny
     endwhile; # koniec while po rodzinach
     fclose($file);
-    echo "\n<br>licznik=$licz ==== koniec budowania grafu ====<br>\n";
+    echo "\n<br>Total $licz records read<br>\n";
     return $People;
 }
 
 ###########################################
-$pathIn = "c:\Users\jaroc\PhpStormProjects\TestFiles\\";
-$gedIn = "test4.ged";
+$pathIn = "";
+$gedIn = "test.ged";
 
 $gedfile = $pathIn.$gedIn;
 
-echo "<br> parsing $gedfile <br>\n";
+echo "Parsing $gedfile <br>\n";
 
 $graph = parseGedcom($gedfile);
 $numPeople = sizeof($graph);
