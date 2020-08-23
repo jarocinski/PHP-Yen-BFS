@@ -28,7 +28,7 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
     <title>Search K shortest paths</title>
     <style>
         table {
-            border: 1px solid black;
+            border: 1px solid grey;
             background-color: #e8dccb;
             border-spacing: 4px;
         }
@@ -37,6 +37,17 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
             max-width: 250px;
             border: 1px solid black;
             text-align: center;
+            background-color: #dcc9ae;
+        }
+        .colspan {
+            border: 1px solid #e8dccb;
+            white-space: nowrap;
+            vertical-align:bottom;
+            text-align: center;
+        }
+        .spantxt {
+            padding: 3px 15px;
+            border: 1px solid black;
             background-color: #dcc9ae;
         }
         input[type='checkbox'] {
@@ -83,6 +94,7 @@ $toNode = "<select name='person2' form='nextpath'>$options2</select>";
         <input type="submit" name="irn" value="Run the search for submitted IRNs" />
     </p>
 </form>
+<span class='pers' style='opacity:0'></span>
 <hr>
 
 <?php
@@ -126,16 +138,17 @@ for ($k=1;$k<=$maxRuns;$k++):
         echo implode('-',$kShortestPaths[$k]);
         continue; # go search for the next $k
     endif;
-//    else - display full names and relatioships
+//    else - display full names and relationships
 //    echo "<br>wyświetlanie nazwisk włączone<br>";
     $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
     $relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
-    $pathNames=[]; $pathNames[] = $namesDict[$fromNode]; # creating aux list of fullnames
-    echo "\n<br>$namesDict[$fromNode]";
+    $pathNames=[]; # creating list of fullnames
+    $pathNames[] = str_replace('/','',$namesDict[$fromNode]);
+    echo "\n<br>$pathNames[0]";
     for ($ord=0;$ord<strlen($relStrings[$k]);$ord++):
         $prevID = $kShortestPaths[$k][$ord];
         $persID = $kShortestPaths[$k][$ord+1];
-        $fullName = $namesDict[$persID];
+        $fullName = str_replace('/','',$namesDict[$persID]);
         $pathNames[] = $fullName;
         $gender = $sexDict[$persID];
         $hisHer = $sexDict[$prevID]=='M'?'his':'her';
@@ -167,28 +180,34 @@ for ($k=1;$k<=$maxRuns;$k++):
             $XY[$x][$y]='('.$relStr[$i].') '.$pathNames[$i+1];
         endforeach;
 
-        $XYtr = array_map(null, ...$XY); # transposing array - what a clever method!
-        $borders=['p'=>" border-bottom:none ",'c'=>" border-top:none ",'s'=>'border-left:none ','@'=>'border:double '];
+        $XYtr = array_map(null, ...$XY); # transposing array - what a clever ... method!
+        $borders=['p'=>' border-bottom:none ','c'=>' border-top:none ','s'=>' border-left:none ','@'=>' border:double '];
         # push php array to html
         $colspan2="";
         $out = "<table>";
-            foreach ($XYtr as $row):
+        foreach ($XYtr as $row):
             $out .= "<tr>";
-                foreach($row as $cell):
-                if ($cell=='merge'): $colspan2="colspan='2'"; continue;
+            foreach($row as $cell):
+                if ($cell=='merge'): $colspan2=true; continue;
                 elseif ($cell==' '): $out .= "<td class='empty'/>";
                 else:
-                //$border=$borders[$cell[0]];
-                $out .= "<td class='pers' " . $colspan2 . ">$cell</td>"; $colspan2="";
+                    if ($colspan2):
+                        $out .= "<td class='colspan' colspan='2'><span class='spantxt'>$cell</span></td>";
+                        $colspan2="";
+                    else: # normal case
+                    //$border=$borders[$cell[0]];
+                        $out .= "<td class='pers' >$cell</td>";
+                    endif;
                 endif;
-                endforeach;
-                $out .= "</tr>";
             endforeach;
-            $out .= "</table>";
+            $out .= "</tr>";
+        endforeach;
+        $out .= "</table>";
         echo $out;
     endif; # end of displaying 2d
-endfor;
+endfor; # end of main loop
 echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
 echo "<br>(the longest path checked was $longestSoFar)";
 echo "<br>Found $relevant relevant paths<hr>";
 
+?>

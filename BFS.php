@@ -18,7 +18,7 @@ function getFam ($edges, $personList, $step) {
     global $visited; # will be used to retrieve the path -- visited[nid]=(dist,vfrom,rel)
     $newNeighbours = [];
     foreach ($personList as $person):
-        if (!isset($edges[$person])){echo"\n<br>error: ";print_r($edges);exit('gkjhgkjhgkjgh');}
+        if (!isset($edges[$person])){echo"\n<br>error: ";print_r($edges);exit('no such person');}
         foreach ($edges[$person] as $nearID=>$rel): # neighbours of $person; finally it is supposed to use SELECT
             if (!isset($nearID)): echo "\n<br> ---- $person has no neighbours"; continue; endif;
             if (!isset($visited[$nearID])): # not visited yet - add it to $visited
@@ -45,7 +45,7 @@ function getFam ($edges, $personList, $step) {
  * If no new people are found on either direction of the searches, it fails immediately, as an isolated
  * part of the tree graph has been detected.
  * @param array $edges - graph is the list of neighbour IDs of every node
- * @global $visited - list of visited nodes (distance, prev node, relationsip of the prev)
+ * @global $visited - list of visited nodes (distance, prev node, relationship of the prev)
  * @param string $start - start node ID
  * @param string $target - target node ID
  * @param int $stepLimit - max. liczba kroków badania sąsiadów (z obu stron)

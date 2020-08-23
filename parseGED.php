@@ -22,7 +22,7 @@ function gender($lin) {  # wycina z linii 1 płeć
     return $lin[6];
 }
 
-function printDots($licznik) {  # drukowanie kropek w miare postępu
+function printDots($licznik) {  # drukowanie kropek w miarę postępu
     # użycie: licznik = printDots(licznik)
     $licznik += 1;
     if ($licznik < 150) echo "."; if ($licznik == 150) echo "\n<br>";
@@ -70,7 +70,7 @@ function parseGedcom($gedcomfile) {
     $curline = fgets($file);
     while (strncmp($curline,"0 @I",4)) $curline = fgets($file); # pomijamy aż do pierwszego INDI
     # znaleziony INDI, teraz zbieramy kolejnych aż trafi się FAM
-#?    if (feof($file)) return; # przedwczesny koniec pliku
+//    if (feof($file)) return; # przedwczesny koniec pliku
     $People = [];
     while(strncmp($curline,"0 @F",4)): # obrabiamy kolejne linie aż natrafimy na FAM
 //        $x=strncmp($curline,"0 @I",4);echo"  $x  ";
@@ -81,7 +81,7 @@ function parseGedcom($gedcomfile) {
             $licz = printDots($licz);
         endif;
         $curline = fgets($file);
-#?    if (feof($file)) return; # przedwczesny koniec pliku
+//    if (feof($file)) return; # przedwczesny koniec pliku
     endwhile;
     echo "\n<br>$licz persons found; now families";
     # znaleziony FAM, teraz dopisujemy osoby z rodziny
@@ -91,7 +91,7 @@ function parseGedcom($gedcomfile) {
     while (!feof($file)): #teraz już do końca pliku zbieramy rodziny
         $licz = printDots($licz);
         $curline = fgets($file); # kolejna linia po FAM
-//        echo "\n<brczłonkowie rodziny: $curline";
+//        echo "\n<br>członkowie rodziny: $curline";
         if (strncmp($curline,"1 HUSB", 6)==0):
             $parents[] = indi($curline);
         elseif (strncmp($curline,"1 WIFE", 6)==0):
@@ -111,7 +111,7 @@ function parseGedcom($gedcomfile) {
                     $People[$chi][$par] = PARENT;
                 endforeach;
             endforeach;
-            # zbierając rodzine natrafiliśmy na jakąś inną linię - jęli to nie FAM to pomijamy do FAM
+            # zbierając rodzine natrafiliśmy na jakąś inną linię - jeśli to nie FAM to pomijamy do FAM
             while (strncmp($curline,"0 @F",4)):
                 $curline = fgets($file);
                 if (feof($file)) break 2;
@@ -120,7 +120,7 @@ function parseGedcom($gedcomfile) {
 //                echo "\n<br>znów rodzina";
                 $parents = [];  # lista rodziców w tej rodzinie - czasem tylko jeden
                 $children = [];  # lista dzieci w tej rodzinie - czasem pusta
-                continue; # kolejna rodzina - kontynuujemy od poczatku while
+                continue; # kolejna rodzina - kontynuujemy od początku while
             endif;
         endif; # koniec członków rodziny
     endwhile; # koniec while po rodzinach

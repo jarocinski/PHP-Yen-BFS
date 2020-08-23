@@ -16,13 +16,13 @@ function mjaBFS($edges, $start, $finish, &$shortestpathfound) {
     global $maxLength;
 //    echo "\n<br>edges[I000001] w mjaBFS = "; print_r($edges['I000001']);
     if ($start==$finish) exit("\n<br>The same person selected as start and finish!");
-    $spotkanie = biBFS($edges, $start, $finish, $maxLength/2);
-    if (is_string($spotkanie)):
-        $shortestpathfound = constructPath($start,$finish,$spotkanie);
+    $encounter = biBFS($edges, $start, $finish, $maxLength/2);
+    if (is_string($encounter)):
+        $shortestpathfound = constructPath($start,$finish,$encounter);
         return TRUE;
-    elseif (is_int($spotkanie)):
-//        if ($spotkanie==0): echo "\n<br>brak (obecnie) połączenia $start z $finish";
-//        else: echo "\n<br>==$spotkanie== nie znaleziono połączenia krótszego od limitu $maxLength/2";
+    elseif (is_int($encounter)):
+//        if ($encounter==0): echo "\n<br>brak (obecnie) połączenia $start z $finish";
+//        else: echo "\n<br>==$encounter== nie znaleziono połączenia krótszego od limitu $maxLength/2";
 //        endif;
         return FALSE;
     endif;
@@ -58,7 +58,7 @@ function YensNextPath($edges,$start,$finish,&$kShortestPaths,$lengthLimit) {
     endif;
     # Searching for k+1 path while previous k are already stored in $kShortestPaths.
     # kth path nodes are taken one by one as $spurNode; preceding part is $rootPath
-    # nodes of $rootPath are made unaccessible as well as links of $spurNode previously used
+    # nodes of $rootPath are made inaccessible as well as links of $spurNode previously used
     $kthPath = $kShortestPaths[$k];
     $kthLength = count($kthPath);  # number of nodes, and not weight
     # main loop through nodes of kth path
@@ -129,7 +129,7 @@ function YensNextPath($edges,$start,$finish,&$kShortestPaths,$lengthLimit) {
     endfor;  # end of main loop through nodes of the kth (i.e., previous) shortest path
     if (count($candidatePaths)>0):  # take shortest candidate as the new shortest path
 //        echo "\n<br>wszyscy kandydaci: \n<br>"; print_r($candidatePaths);
-//        echo "\n<br>ich dlugosci \n<br>"; print_r($candidateWeights);
+//        echo "\n<br>ich długości \n<br>"; print_r($candidateWeights);
         $bestCandInd = array_search(min($candidateWeights),$candidateWeights);
         $bestCandidate = $candidatePaths[$bestCandInd];
 //        echo "\n<br>najlepszy kandydat: index $bestCandInd \n<br>".implode('-',$bestCandidate);
@@ -173,7 +173,7 @@ function skipPath (int $k, array $allRelStrings, array $kthPath, array $graph, b
         return true;
     endif;
     if (substr_count($kthRelString,'ps') > 0): # check if 'ps' concerns both parents (and not another marriage of a parent)
-        $from = 1; # start search from beginning (excl.x), then after an occurence
+        $from = 1; # start search from beginning (excl.x), then after an occurrence
         while ($pos=strpos('x'.$kthRelString, 'ps', $from)): # in the original string $pos may be 0 (equal to false!)
             if (isset($graph[$kthPath[$pos-1]][$kthPath[$pos+1]])):
                 if ($echo) echo "(note that $k th = $kthRelString goes to a parent via the other parent and not directly)\n<br>";
@@ -205,7 +205,7 @@ $echo=false;
 $kShortestPaths = []; # all paths will be saved here
 $relStrings = []; # ...and relationship sequences here
 
-if (count(get_included_files())==0): # jesli 3 to uruchamiamy ten skrypt z ręki a nie jako include
+if (count(get_included_files())==0): # jeśli 3 to uruchamiamy ten skrypt z ręki a nie jako include
     echo "<br><br>*********** wywołanie bezpośrednie";
     //$fromNode = 'I000001';
     $fromNode = 'I017036'; # Wojciech Jarociński ojciec Małgorzaty
