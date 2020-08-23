@@ -106,90 +106,89 @@ elseif (isset($_POST["irn"])):
 endif;
 if ($fromNode==$toNode): echo "The same person selected as start and end!"; return; endif;
 
-echo "\n\n<br><br>Person1 $fromNode is&nbsp;<samp> $namesDict[$fromNode]</samp>";
+echo "\n<br>Person1 $fromNode is&nbsp;<samp> $namesDict[$fromNode]</samp>";
 echo "\n<br>Person2 $toNode is&nbsp;<samp> $namesDict[$toNode]</samp>";
 $longestSoFar=0;
 $relevant=0;
 for ($k=1;$k<=$maxRuns;$k++):
-YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
-if (!$pathExists):
-echo "\n<br>There is no connection between $fromNode and $toNode shorter than $maxLength";
-return; # exit from Yen-BFS and return to index
-endif;
-$relStrings[$k] = constructRelString($kShortestPaths[$k],$graph);
-$longestSoFar=max($longestSoFar,strlen($relStrings[$k]));
-if (skipPath ($k,$relStrings,$kShortestPaths[$k],$graph,$echo) ):
-continue; # go to finding the next path
-else:  # display results
-echo "\n\n<br><br> The $k"."th path is:\n<br>";
-$relevant+=1;
-if (!isset($_POST["names"])&&!isset($_POST["rels"])): # don't display names
-echo implode('-',$kShortestPaths[$k]);
-else: # display full names and relatioships
-//                echo "<br>wyświetlanie nazwisk włączone<br>";
-$relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
-$relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
-$pathNames=[]; $pathNames[] = $namesDict[$fromNode]; # creating aux list of fullnames
-echo "\n<br>$namesDict[$fromNode]";
-for ($ord=0;$ord<strlen($relStrings[$k]);$ord++):
-$prevID = $kShortestPaths[$k][$ord];
-$persID = $kShortestPaths[$k][$ord+1];
-$fullName = $namesDict[$persID];
-$pathNames[] = $fullName;
-$gender = $sexDict[$persID];
-$hisHer = $sexDict[$prevID]=='M'?'his':'her';
-$rel = $relStrings[$k][$ord];
-$relation = $relTable[$gender][$rel];
-echo " --$hisHer $relation $fullName";
-endfor;
-endif;
-echo "\n<br> rel.sentence = $relStrings[$k]";
-$l=strlen($relStrings[$k]); $m=substr_count($relStrings[$k],'s');
-echo " (length = $l incl.$m marriages)";
+    YensNextPath($graph,$fromNode,$toNode,$kShortestPaths,$maxLength);
+    if (!$pathExists):
+        echo "\n<br>There is no connection between $fromNode and $toNode shorter than $maxLength";
+        return; # exit from Yen-BFS and return to index
+    endif;
+    $relStrings[$k] = constructRelString($kShortestPaths[$k],$graph);
+    $longestSoFar=max($longestSoFar,strlen($relStrings[$k]));
+    if (skipPath ($k,$relStrings,$kShortestPaths[$k],$graph,$echo) ) continue; # go search for the next $k
+//    else - display results
+    echo "\n\n<br><br> The $k"."th path is:\n<br>";
+    $relevant+=1;
+    if (!isset($_POST["names"])&&!isset($_POST["rels"])): # don't display names
+        echo implode('-',$kShortestPaths[$k]);
+        continue; # go search for the next $k
+    endif;
+//    else - display full names and relatioships
+//    echo "<br>wyświetlanie nazwisk włączone<br>";
+    $relTable['M'] = ['p'=>'father','c'=>'son','s'=>'husband'];
+    $relTable['F'] = ['p'=>'mother', 'c'=>'daughter', 's'=>'wife'];
+    $pathNames=[]; $pathNames[] = $namesDict[$fromNode]; # creating aux list of fullnames
+    echo "\n<br>$namesDict[$fromNode]";
+    for ($ord=0;$ord<strlen($relStrings[$k]);$ord++):
+        $prevID = $kShortestPaths[$k][$ord];
+        $persID = $kShortestPaths[$k][$ord+1];
+        $fullName = $namesDict[$persID];
+        $pathNames[] = $fullName;
+        $gender = $sexDict[$persID];
+        $hisHer = $sexDict[$prevID]=='M'?'his':'her';
+        $rel = $relStrings[$k][$ord];
+        $relation = $relTable[$gender][$rel];
+        echo " --$hisHer $relation $fullName";
+    endfor;
+    echo "\n<br> rel.string = $relStrings[$k]";
+    $l=strlen($relStrings[$k]); $m=substr_count($relStrings[$k],'s');
+    echo " (length = $l incl.$m marriages)";
 
-if (isset($_POST["rels"])): # prepare 2d diagram
-$relStr = $relStrings[$k];
-//                echo "\n<br>$relStr";
-$xMax = substr_count($relStr,'s')+substr_count($relStr,'pc')+1;
-$y=$yMax=$yMin=0;
-for ($i=0;$i<strlen($relStr);$i++): # calc y range
-if ($relStr[$i]=='p') $yMin = min(--$y,$yMin);
-if ($relStr[$i]=='c') $yMax = max(++$y,$yMax);
-endfor;
-$yMax=$yMax-$yMin+1; # counting from 0 finally
-$XY = array_fill(0,$xMax,array_fill(0,$yMax,' ')); # init empty array
-$x=0; $y=-$yMin; #start position
-$XY[$x][$y] = '(@) '.$pathNames[0]; # first person
-foreach (range(0,strlen($relStr)-1) as $i):
-$x+=$pcs2move[$relStr[$i]]['x'];
-$y+=$pcs2move[$relStr[$i]]['y'];
-if (substr($relStr,$i,2)=='pc'): $XY[$x][$y]='merge'; $x++; endif;
-$XY[$x][$y]='('.$relStr[$i].') '.$pathNames[$i+1];
-endforeach;
-
-$XYtr = array_map(null, ...$XY); # transposing array - what a clever method!
-$borders=['p'=>" border-bottom:none ",'c'=>" border-top:none ",'s'=>'border-left:none ','@'=>'border:double '];
-# push php array to html
-$colspan2="";
-$out = "<table>";
-    foreach ($XYtr as $row):
-    $out .= "<tr>";
-        foreach($row as $cell):
-        if ($cell=='merge'): $colspan2="colspan='2'"; continue;
-        elseif ($cell==' '): $out .= "<td class='empty'/>";
-        else:
-        //                            $border=$borders[$cell[0]];
-        $out .= "<td class='pers' " . $colspan2 . ">$cell</td>"; $colspan2="";
-        endif;
+    if (isset($_POST["rels"])): # prepare 2d diagram
+        $relStr = $relStrings[$k];
+//            echo "\n<br>$relStr";
+        $xMax = substr_count($relStr,'s')+substr_count($relStr,'pc')+1;
+        $y=$yMax=$yMin=0;
+        for ($i=0;$i<strlen($relStr);$i++): # calc y range
+            if ($relStr[$i]=='p') $yMin = min(--$y,$yMin);
+            if ($relStr[$i]=='c') $yMax = max(++$y,$yMax);
+        endfor;
+        $yMax=$yMax-$yMin+1; # counting from 0 finally
+        $XY = array_fill(0,$xMax,array_fill(0,$yMax,' ')); # init empty array
+        $x=0; $y=-$yMin; #start position
+        $XY[$x][$y] = '(@) '.$pathNames[0]; # first person
+        foreach (range(0,strlen($relStr)-1) as $i):
+            $x+=$pcs2move[$relStr[$i]]['x'];
+            $y+=$pcs2move[$relStr[$i]]['y'];
+            if (substr($relStr,$i,2)=='pc'): $XY[$x][$y]='merge'; $x++; endif;
+            $XY[$x][$y]='('.$relStr[$i].') '.$pathNames[$i+1];
         endforeach;
-        $out .= "</tr>";
-    endforeach;
-    $out .= "</table>";
-echo $out;
-endif; # end of displaying 2d
-endif;
+
+        $XYtr = array_map(null, ...$XY); # transposing array - what a clever method!
+        $borders=['p'=>" border-bottom:none ",'c'=>" border-top:none ",'s'=>'border-left:none ','@'=>'border:double '];
+        # push php array to html
+        $colspan2="";
+        $out = "<table>";
+            foreach ($XYtr as $row):
+            $out .= "<tr>";
+                foreach($row as $cell):
+                if ($cell=='merge'): $colspan2="colspan='2'"; continue;
+                elseif ($cell==' '): $out .= "<td class='empty'/>";
+                else:
+                //$border=$borders[$cell[0]];
+                $out .= "<td class='pers' " . $colspan2 . ">$cell</td>"; $colspan2="";
+                endif;
+                endforeach;
+                $out .= "</tr>";
+            endforeach;
+            $out .= "</table>";
+        echo $out;
+    endif; # end of displaying 2d
 endfor;
 echo "\n\n<br><br>No more paths shorter than $maxLength found in $maxRuns runs";
 echo "<br>(the longest path checked was $longestSoFar)";
-echo "<br>Found $relevant relevant paths";
+echo "<br>Found $relevant relevant paths<hr>";
 
