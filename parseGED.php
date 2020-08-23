@@ -25,7 +25,7 @@ function gender($lin) {  # wycina z linii 1 płeć
 function printDots($licznik) {  # drukowanie kropek w miare postępu
     # użycie: licznik = printDots(licznik)
     $licznik += 1;
-    if ($licznik < 200) echo "."; if ($licznik == 200) echo "\n<br>";
+    if ($licznik < 150) echo "."; if ($licznik == 150) echo "\n<br>";
     if ($licznik % 200 == 0) echo ".";
     if ($licznik % 40000 == 0) echo"\n<br>";
     return $licznik;
@@ -135,10 +135,11 @@ $gedIn = "test.ged";
 
 $gedfile = $pathIn.$gedIn;
 
-echo "Parsing $gedfile <br>\n";
+echo "Parsing $gedfile ";
 
 $graph = parseGedcom($gedfile);
 $numPeople = sizeof($graph);
-echo "Number of graph nodes (i.e., number of people in the tree): $numPeople<br><hr>";
+//echo "Number of graph nodes (i.e., number of people in the tree): $numPeople<br>";
+echo "<hr>";
 //print_r($graph);
 //print_r($namesDict);
